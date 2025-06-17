@@ -13,6 +13,8 @@ class DataModule(pl.LightningDataModule):
         self.data_dir = data_dir
 
         self.transform = transforms.Compose([
+            transforms.RandomVerticalFlip(),
+            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
