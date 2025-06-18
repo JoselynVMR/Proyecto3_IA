@@ -38,7 +38,7 @@ class DataModule(pl.LightningDataModule):
         np.random.shuffle(indices)
 
         # Calcular el número de muestras etiquetadas
-        label_count = int(total_size * self.label_pct)
+        label_count = int(total_size * self.hparams.label_pct)
 
         # Dividir los índices en etiquetados y no etiquetados
         labeled_indices = indices[:label_count]
@@ -63,7 +63,8 @@ class DataModule(pl.LightningDataModule):
             self.labeled_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=True
+            shuffle=True,
+            persistent_workers=True
         )
 
     def unlabeled_dataloader(self):
@@ -71,7 +72,8 @@ class DataModule(pl.LightningDataModule):
             self.unlabeled_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=True
+            shuffle=True,
+            persistent_workers=True
         )
 
     def val_dataloader(self):
@@ -79,7 +81,8 @@ class DataModule(pl.LightningDataModule):
             self.val_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=False
+            shuffle=False,
+            persistent_workers=True
         )
 
     def test_dataloader(self):
@@ -87,5 +90,15 @@ class DataModule(pl.LightningDataModule):
             self.test_ds,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
-            shuffle=False
+            shuffle=False,
+            persistent_workers=True
+        )
+
+    def train_dataloader(self):
+        return DataLoader(
+            self.unlabeled_ds,
+            batch_size=self.hparams.batch_size,
+            num_workers=self.hparams.num_workers,
+            shuffle=True,
+            persistent_workers=True
         )
