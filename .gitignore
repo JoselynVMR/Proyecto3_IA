@@ -1,9 +1,5 @@
 data/
 wandb/
-encoder_bottleneck.pth
-encoder_stage1.pth
-encoder_stage2.pth
-encoder_stage3.pth
 _pycache_
 checkpoints/
 archive.zip
