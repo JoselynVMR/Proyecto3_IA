@@ -5,6 +5,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from classifier import ButterflyClassifier
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataModule import DataModule
 import torch
 
@@ -15,7 +17,7 @@ if __name__ == '__main__':
         'num_workers': 4,
         'seed': 42,
         'learning_rate': 1e-3,
-        'label_pct': 0.3  # Cambiar a 0.1 para la segunda corrida
+        'label_pct': 0.1
     }
 
     # Directorio de datos
@@ -41,7 +43,11 @@ if __name__ == '__main__':
     #os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948" # Llave Esteban
     os.environ["WANDB_API_KEY"] = "3e7282c2a62557882828c8d06b01ec4b8f7135a1"  # Llave Joselyn
     for config in classifiers:
-        wandb_logger = WandbLogger(project="butterfly-classifier", name=f"{config['name']}_{int(hparams['label_pct']*100)}pct")
+        wandb_logger = WandbLogger(
+            project="butterfly-classifier",
+            name=f"{config['name']}_{int(hparams['label_pct']*100)}pct",
+            config=hparams
+        )
 
         # Inicializar módulo de datos
         data_module = DataModule(hparams=hparams, data_dir=data_dir)
@@ -63,7 +69,7 @@ if __name__ == '__main__':
         )
         checkpoint_callback = ModelCheckpoint(
             monitor="val_loss",
-            dirpath=f"checkpoints/classifier/{config['name']}",
+            dirpath="checkpoints/classifier",
             filename=f"best-{config['name']}",
             save_top_k=1,
             mode="min"
@@ -86,5 +92,7 @@ if __name__ == '__main__':
 
         # Guardar modelo
         torch.save(model.state_dict(), f"checkpoints/classifier/{config['name']}_final.pth")
+
+        wandb.finish()
 
     print("Entrenamiento de clasificadores completado.")
