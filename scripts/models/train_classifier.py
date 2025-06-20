@@ -91,7 +91,7 @@ if __name__ == '__main__':
         trainer.test(model, datamodule=data_module)
 
         # Guardar modelo
-        torch.save(model.state_dict(), f"checkpoints/classifier/{config['name']}_final.pth")
+        torch.save(model.state_dict(), f"checkpoints/classifier/{config['name']}_{int(hparams['label_pct']*100)}pct_final.pth")
 
         wandb.finish()
 
