@@ -25,7 +25,7 @@ class ButterflyClassifier(pl.LightningModule):
             autoencoder.encoder2.load_state_dict(state_dict['encoder2'])
             autoencoder.encoder3.load_state_dict(state_dict['encoder3'])
             autoencoder.bottleneck.load_state_dict(state_dict['bottleneck'])
-
+    
         # Definir el encoder
         self.encoder = nn.Sequential(
             autoencoder.encoder1,

@@ -40,8 +40,8 @@ if __name__ == '__main__':
     ]
 
     # Inicializar WandB
-    #os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948" # Llave Esteban
-    os.environ["WANDB_API_KEY"] = "3e7282c2a62557882828c8d06b01ec4b8f7135a1"  # Llave Joselyn
+    os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948" # Llave Esteban
+    #os.environ["WANDB_API_KEY"] = "3e7282c2a62557882828c8d06b01ec4b8f7135a1"  # Llave Joselyn
     for config in classifiers:
         wandb_logger = WandbLogger(
             project="butterfly-classifier",
@@ -72,12 +72,13 @@ if __name__ == '__main__':
             dirpath="checkpoints/classifier",
             filename=f"best-{config['name']}",
             save_top_k=1,
+            save_weights_only=True,
             mode="min"
         )
 
         # Entrenador
         trainer = pl.Trainer(
-            max_epochs=20,
+            max_epochs=10,
             logger=wandb_logger,
             callbacks=[early_stop_callback, checkpoint_callback],
             accelerator="auto",

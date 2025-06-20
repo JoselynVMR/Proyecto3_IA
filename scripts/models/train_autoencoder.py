@@ -28,8 +28,8 @@ if __name__ == '__main__':
     print(data_dir)
 
     # Inicializar WandB
-    #os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948" # Llave Esteban
-    os.environ["WANDB_API_KEY"] = "3e7282c2a62557882828c8d06b01ec4b8f7135a1" # Llave Joselyn
+    os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948" # Llave Esteban
+    #os.environ["WANDB_API_KEY"] = "3e7282c2a62557882828c8d06b01ec4b8f7135a1" # Llave Joselyn
     wandb_logger = WandbLogger(project="butterfly-autoencoder", name="UNetAE_70pct")
 
     # Inicializar módulo de datos
