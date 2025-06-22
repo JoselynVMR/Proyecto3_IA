@@ -33,7 +33,7 @@ if __name__ == '__main__':
     wandb_logger = WandbLogger(project="butterfly-autoencoder", name="UNetAE_70pct")
 
     # Inicializar módulo de datos
-    data_module = DataModule(hparams=hparams, data_dir=data_dir)
+    data_module = DataModuleE1(hparams=hparams, data_dir=data_dir)
 
     # Inicializar modelo
     model = UNetAutoencoder(learning_rate=hparams['learning_rate'])

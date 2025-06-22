@@ -50,7 +50,7 @@ if __name__ == '__main__':
         )
 
         # Inicializar módulo de datos
-        data_module = DataModule(hparams=hparams, data_dir=data_dir)
+        data_module = DataModuleE1(hparams=hparams, data_dir=data_dir)
 
         # Inicializar modelo
         model = ButterflyClassifier(
