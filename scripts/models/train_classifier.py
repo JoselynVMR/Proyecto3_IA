@@ -7,7 +7,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from classifier import ButterflyClassifier
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from dataModule import DataModule
+from dataModuleE1 import DataModuleE1
 import torch
 
 if __name__ == '__main__':

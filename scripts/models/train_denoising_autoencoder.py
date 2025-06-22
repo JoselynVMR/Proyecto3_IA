@@ -9,7 +9,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from denoising_autoencoder import UNetAutoencoder
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from dataModule import DataModule
+from dataModuleE2 import DataModuleE2
 
 def train_denoising_autoencoder():
     # Hiperparámetros
@@ -29,7 +29,7 @@ def train_denoising_autoencoder():
     wandb_logger = WandbLogger(project="butterfly-dae", name="DAE_saltpepper_10pct")
 
     # DataModule con ruido Salt and Pepper en entrenamiento
-    data_module = DataModule(hparams=hparams, data_dir=data_dir, use_noise=True)
+    data_module = DataModuleE2(hparams=hparams, data_dir=data_dir, use_noise=True)
 
     # Modelo
     model = UNetAutoencoder(learning_rate=hparams['learning_rate'])

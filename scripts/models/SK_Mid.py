@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from tsne_kmeans import extract_latents, plot_tsne_kmeans, show_cluster
 from denoising_autoencoder import UNetAutoencoder
-from dataModule import DataModule
+from dataModuleE2 import DataModuleE2
 
 model = UNetAutoencoder.load_from_checkpoint("checkpoints/dae/best-DAE.ckpt")
 model.eval()
@@ -22,7 +22,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in global
 data_dir = os.path.abspath(os.path.join(current_dir, "../../data/species_selected"))
 
 # Usar datos sin ruido para análisis latente
-data_module_no_noise = DataModule(hparams=hparams, data_dir=data_dir)
+data_module_no_noise = DataModuleE2(hparams=hparams, data_dir=data_dir)
 data_module_no_noise.setup("fit")
 dataloader = data_module_no_noise.train_dataloader()
 

@@ -6,7 +6,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from autoencoder_unet import UNetAutoencoder
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from dataModule import DataModule
+from dataModuleE1 import DataModuleE1
 
 import torch
 import torch.nn.functional as F
