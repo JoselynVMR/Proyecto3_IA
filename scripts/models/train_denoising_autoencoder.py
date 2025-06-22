@@ -1,12 +1,15 @@
 import os
+import wandb
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 # Importa tu autoencoder y datamodule personalizado
-from models.denoising_autoencoder import UNetAutoencoder
-from datamodules.data_module import DataModule
+from denoising_autoencoder import UNetAutoencoder
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from dataModule import DataModule
 
 def train_denoising_autoencoder():
     # Hiperparámetros
@@ -22,11 +25,11 @@ def train_denoising_autoencoder():
     data_dir = os.path.abspath(os.path.join(current_dir, "../../data/species_selected"))
 
     # Inicializar W&B
-    os.environ["WANDB_API_KEY"] = "TU_API_KEY"
+    os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948"
     wandb_logger = WandbLogger(project="butterfly-dae", name="DAE_saltpepper_10pct")
 
     # DataModule con ruido Salt and Pepper en entrenamiento
-    data_module = DataModule(hparams=hparams, data_dir=data_dir)
+    data_module = DataModule(hparams=hparams, data_dir=data_dir, use_noise=True)
 
     # Modelo
     model = UNetAutoencoder(learning_rate=hparams['learning_rate'])
@@ -49,7 +52,7 @@ def train_denoising_autoencoder():
 
     # Entrenador
     trainer = pl.Trainer(
-        max_epochs=20,
+        max_epochs=10,
         logger=wandb_logger,
         callbacks=[early_stop_callback, checkpoint_callback],
         accelerator="auto",
