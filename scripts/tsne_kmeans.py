@@ -10,23 +10,38 @@ from matplotlib import pyplot as plt
 
 def extract_latents(model, dataloader, device):
     model.eval()
-    features = []
+    latents_list = []
+
     with torch.no_grad():
         for batch in dataloader:
             x, _ = batch
             x = x.to(device)
-            x = model.encoder1(x)
-            x = model.encoder2(x)
-            x = model.encoder3(x)
-            x = model.bottleneck(x)
-            features.append(x.view(x.size(0), -1).cpu())
-    return torch.cat(features, dim=0).numpy()
+
+            # Encoder forward pass (U-Net con poolings)
+            e1 = model.encoder1(x)
+            p1 = model.pool1(e1)
+
+            e2 = model.encoder2(p1)
+            p2 = model.pool2(e2)
+
+            e3 = model.encoder3(p2)
+            p3 = model.pool3(e3)
+
+            b = model.bottleneck(p3)
+
+            z = b.view(b.size(0), -1).cpu()
+            latents_list.append(z)
+
+            del x, e1, e2, e3, p1, p2, p3, b, z  # Libera memoria
+            torch.cuda.empty_cache()
+
+    return torch.cat(latents_list, dim=0).numpy()
 
 def plot_tsne_kmeans(latents, n_clusters=10, save_path="tsne_kmeans.png"):
-    tsne = TSNE(n_components=2, perplexity=30)
+    tsne = TSNE(n_components=2, perplexity=20, max_iter=2000, n_iter_without_progress=500)
     latents_2d = tsne.fit_transform(latents)
 
-    kmeans = KMeans(n_clusters=n_clusters)
+    kmeans = KMeans(n_clusters=n_clusters, max_iter=500, algorithm="lloyd")
     labels = kmeans.fit_predict(latents)
 
     plt.figure(figsize=(10, 8))
@@ -74,3 +89,22 @@ def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, outp
         plt.savefig(f"{output_dir}/cluster_{i}.png")
         plt.close()
 
+def plot_tsne_only(latents, save_path="tsne_only.png"):
+    """
+    Visualiza el espacio latente usando t-SNE sin aplicar KMeans.
+    Los puntos se colorean aleatoriamente porque no hay etiquetas verdaderas.
+    """
+    tsne = TSNE(n_components=2, perplexity=15, max_iter=2000, n_iter_without_progress=500)
+    latents_2d = tsne.fit_transform(latents)
+
+    # Colores aleatorios solo para visualización estética
+    colors = [random.random() for _ in range(len(latents_2d))]
+
+    plt.figure(figsize=(10, 8))
+    plt.scatter(latents_2d[:, 0], latents_2d[:, 1], c=colors, cmap="viridis", alpha=0.6)
+    plt.title("Visualización del espacio latente con t-SNE")
+    plt.xlabel("Componente 1")
+    plt.ylabel("Componente 2")
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()

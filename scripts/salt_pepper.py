@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-def salt_and_pepper_noise(img, amount=0.05):
+def salt_and_pepper_noise(img, amount=0.02):
     noisy = img.clone()
     c, h, w = noisy.shape
 

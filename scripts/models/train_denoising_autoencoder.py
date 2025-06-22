@@ -17,7 +17,7 @@ def train_denoising_autoencoder():
         'batch_size': 64,
         'num_workers': 4,
         'seed': 42,
-        'label_pct': 0.1,  # Pequeño subset etiquetado
+        'label_pct': 0.3,  # Pequeño subset etiquetado
         'learning_rate': 1e-3
     }
 
@@ -37,7 +37,8 @@ def train_denoising_autoencoder():
     # Callbacks
     early_stop_callback = EarlyStopping(
         monitor="val_loss",
-        patience=5,
+        patience=10,
+        min_delta=0.0005,
         verbose=True,
         mode="min"
     )
