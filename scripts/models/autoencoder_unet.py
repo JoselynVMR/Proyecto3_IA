@@ -21,12 +21,12 @@ class UNetAutoencoder(pl.LightningModule):
 
         self.bottleneck = nn.Sequential(
             nn.Conv2d(features * 4, features * 8, kernel_size=3, padding=1),
-            nn.InstanceNorm2d(features * 8),
-            nn.LeakyReLU(negative_slope=0.01, inplace=True),
+            nn.BatchNorm2d(features * 8),
+            nn.ReLU(inplace=True),
             nn.Dropout(0.3),
             nn.Conv2d(features * 8, features * 8, kernel_size=3, padding=1),
-            nn.InstanceNorm2d(features * 8),
-            nn.LeakyReLU(negative_slope=0.01, inplace=True)
+            nn.BatchNorm2d(features * 8),
+            nn.ReLU(inplace=True)
         )
 
         self.upconv3 = nn.ConvTranspose2d(features * 8, features * 4, kernel_size=2, stride=2)
@@ -43,11 +43,11 @@ class UNetAutoencoder(pl.LightningModule):
     def _block(self, in_channels, out_channels):
         return nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
-            nn.LeakyReLU(negative_slope=0.01, inplace=True),
-            nn.InstanceNorm2d(out_channels),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
-            nn.LeakyReLU(negative_slope=0.01, inplace=True),
-            nn.InstanceNorm2d(out_channels),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
         )
 
     def forward(self, x):
@@ -75,7 +75,7 @@ class UNetAutoencoder(pl.LightningModule):
 
     def step(self, batch, stage):
         x_input, _ = batch
-        x_hat = self(x_input)
+        x_hat = self.forward(x_input)
         loss = F.mse_loss(x_hat, x_input)
         self.log(f"{stage}_loss", loss)
         return loss

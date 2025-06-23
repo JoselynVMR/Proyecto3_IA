@@ -39,8 +39,6 @@ def train_autoencoder():
     # 📊 W&B Logger
     os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948"
     #os.environ["WANDB_API_KEY"] = "3e7282c2a62557882828c8d06b01ec4b8f7135a1" # Llave Joselyn
-    os.environ["WANDB_MODE"] = "online"
-    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
     wandb_logger = WandbLogger(project="butterfly-ae", name=run_name)
 
     # 📦 DataModule sin ruido (autoencoder clásico)

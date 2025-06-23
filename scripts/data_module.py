@@ -48,17 +48,22 @@ class DataModule(pl.LightningDataModule):
             root=os.path.join(self.data_dir, 'train'),
             transform=transform
         )
-        total_size = len(train_data)
-        indices = np.arange(total_size)
-        np.random.seed(self.hparams.seed)
-        np.random.shuffle(indices)
 
-        label_count = int(total_size * self.hparams.label_pct)
-        labeled_indices = indices[:label_count]
-        unlabeled_indices = indices[label_count:]
+        if self.use_noise:
+            # Usar todo el dataset directamente
+            self.unlabeled_ds = train_data
+        else:
+            total_size = len(train_data)
+            indices = np.arange(total_size)
+            np.random.seed(self.hparams.seed)
+            np.random.shuffle(indices)
 
-        self.labeled_ds = Subset(train_data, labeled_indices)
-        self.unlabeled_ds = Subset(train_data, unlabeled_indices)
+            label_count = int(total_size * self.hparams.label_pct)
+            labeled_indices = indices[:label_count]
+            unlabeled_indices = indices[label_count:]
+
+            self.labeled_ds = Subset(train_data, labeled_indices)
+            self.unlabeled_ds = Subset(train_data, unlabeled_indices)
 
         self.val_ds = datasets.ImageFolder(
             root=os.path.join(self.data_dir, 'valid'),

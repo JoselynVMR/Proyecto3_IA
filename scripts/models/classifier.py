@@ -13,7 +13,7 @@ class ButterflyClassifier(pl.LightningModule):
         encoder_weights_path=None,
         freeze_encoder=False,
         num_classes=30,
-        learning_rate=1e-3,
+        learning_rate=1e-3
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -52,9 +52,16 @@ class ButterflyClassifier(pl.LightningModule):
         # 🔚 Capa fully connected
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(num_features, 1024),
-            nn.ReLU(),
+            nn.Linear(num_features, 2048),
+            nn.BatchNorm1d(2048),
+            nn.ReLU(inplace=True),
             nn.Dropout(0.5),
+
+            nn.Linear(2048, 1024),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.5),
+
             nn.Linear(1024, num_classes)
         )
 
@@ -74,7 +81,7 @@ class ButterflyClassifier(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        logits = self(x)
+        logits = self.forward(x)
         loss = self.loss_fn(logits, y)
         acc = self.train_accuracy(logits, y)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
@@ -83,7 +90,7 @@ class ButterflyClassifier(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        logits = self(x)
+        logits = self.forward(x)
         loss = self.loss_fn(logits, y)
         acc = self.val_accuracy(logits, y)
         self.log("val_loss", loss, on_epoch=True, prog_bar=True)
@@ -91,7 +98,7 @@ class ButterflyClassifier(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
-        logits = self(x)
+        logits = self.forward(x)
         loss = self.loss_fn(logits, y)
         acc = self.test_accuracy(logits, y)
         precision = self.test_precision(logits, y)
@@ -106,4 +113,7 @@ class ButterflyClassifier(pl.LightningModule):
         }, on_epoch=True)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
+        return {"optimizer": optimizer, "lr_scheduler": {"scheduler": scheduler, "monitor": "val_loss"}}
+
