@@ -31,13 +31,13 @@ if __name__ == "__main__":
 
     # ⚙️ DataModule sin ruido para extracción limpia
     hparams = {
-        'batch_size': 16,
+        'batch_size': 64,
         'num_workers': 4,
         'seed': 42,
-        'label_pct': 0.3  # No importa para DAE en este punto
+        'label_pct': 1.0  # No importa para DAE en este punto
     }
 
-    data_module = DataModule(hparams=hparams, data_dir=data_dir, use_noise=False)
+    data_module = DataModule(hparams=hparams, data_dir=data_dir, use_noise=True, noise_amount=0.0)
     data_module.setup("fit")
     dataloader = data_module.train_dataloader()
 
