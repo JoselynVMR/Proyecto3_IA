@@ -7,23 +7,24 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
-# Añadir la ruta raíz
+# Añadir la ruta raíz del proyecto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-# Importar modelo y datamodule
-from scripts.models.autoencoder_unet import UNetAutoencoder
-from scripts.data_module import DataModule
+# 🔁 Importar modelo VDAE/DAE unificado y DataModule actualizado
+from scripts.models.variational_autoencoder_unet import UNetAutoencoder
+from scripts.noisy_pair_data_module import DataModule
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-def train_denoising_autoencoder():
+def train_dae():
     # Hiperparámetros
     hparams = {
         'batch_size': 64,
         'num_workers': 4,
         'seed': 42,
-        'label_pct': 1.0,  # Usar 100% de datos para entrenamiento sin dividir etiquetas
-        'learning_rate': 1e-3
+        'learning_rate': 1e-4,
+        'latent_dim': 512,
+        'image_size': (128, 128)  # Coherente con la arquitectura
     }
 
     # Rutas
@@ -31,21 +32,29 @@ def train_denoising_autoencoder():
     data_dir = os.path.abspath(os.path.join(current_dir, "../../data/species_selected"))
     checkpoint_dir = "checkpoints/dae"
     weights_dir = "weights/dae"
-    run_name = "DAE_saltpepper_100pct"
+    run_name = "DAE_train_run"
 
     os.makedirs(checkpoint_dir, exist_ok=True)
     os.makedirs(weights_dir, exist_ok=True)
 
-    # Inicializar Weights & Biases
+    # Inicializar WandB
     os.environ["WANDB_API_KEY"] = "757af0e5727478d40e4a586ed9175f733ee00948"
     os.environ["LOKY_MAX_CPU_COUNT"] = "6"
     wandb_logger = WandbLogger(project="butterfly-dae", name=run_name)
 
-    # DataModule con ruido Salt and Pepper en entrenamiento
-    data_module = DataModule(hparams=hparams, data_dir=data_dir, use_noise=True, noise_amount=0.15)
+    # DataModule actualizado con ruido
+    data_module = DataModule(
+        hparams=hparams,
+        data_dir=data_dir,
+        noise_amount=0.15,
+        image_size=hparams['image_size']
+    )
 
-    # Modelo
-    model = UNetAutoencoder(learning_rate=hparams['learning_rate'])
+    # Modelo DAE (use_variational=False)
+    model = UNetAutoencoder(
+        latent_dim=hparams['latent_dim'],
+        learning_rate=hparams['learning_rate']
+    )
 
     # Callbacks
     early_stop_callback = EarlyStopping(
@@ -62,10 +71,10 @@ def train_denoising_autoencoder():
         filename="best-DAE",
         save_top_k=1,
         mode="min",
-        save_weights_only=True,
+        save_weights_only=True
     )
 
-    # Entrenador
+    # Trainer
     trainer = pl.Trainer(
         max_epochs=10,
         logger=wandb_logger,
@@ -83,9 +92,9 @@ def train_denoising_autoencoder():
     torch.save(model.encoder1.state_dict(), f"{weights_dir}/dae_encoder1.pth")
     torch.save(model.encoder2.state_dict(), f"{weights_dir}/dae_encoder2.pth")
     torch.save(model.encoder3.state_dict(), f"{weights_dir}/dae_encoder3.pth")
-    torch.save(model.bottleneck.state_dict(), f"{weights_dir}/dae_bottleneck.pth")
-    print("✅ Pesos del encoder guardados exitosamente.")
+    torch.save(model.conv_bottleneck.state_dict(), f"{weights_dir}/dae_bottleneck.pth")
+    print("✅ Pesos del encoder (DAE) guardados exitosamente.")
 
 # Ejecución directa
 if __name__ == '__main__':
-    train_denoising_autoencoder()
+    train_dae()

@@ -5,36 +5,17 @@ from torch.utils.data import DataLoader, Subset
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from typing import Dict
-from scripts.salt_pepper import salt_and_pepper_noise
-
-class AddSaltPepper:
-    def __init__(self, amount=0.05):
-        self.amount = amount
-
-    def __call__(self, img):
-        img_tensor = transforms.ToTensor()(img)
-        noisy_img = salt_and_pepper_noise(img_tensor, amount=self.amount)
-        return noisy_img
     
 class DataModule(pl.LightningDataModule):
-    def __init__(self, hparams: Dict, data_dir: str, use_noise=False, noise_amount=0.05):
+    def __init__(self, hparams: Dict, data_dir: str):
         super().__init__()
         self.save_hyperparameters(hparams)
         self.data_dir = data_dir
-        self.use_noise = use_noise
-        self.noise_amount = noise_amount
 
         self.transform_clean = transforms.Compose([
             transforms.RandomVerticalFlip(),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
-
-        self.transform_noisy = transforms.Compose([
-            transforms.RandomVerticalFlip(),
-            transforms.RandomHorizontalFlip(),
-            AddSaltPepper(amount=self.noise_amount),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
@@ -49,21 +30,17 @@ class DataModule(pl.LightningDataModule):
             transform=transform
         )
 
-        if self.use_noise:
-            # Usar todo el dataset directamente
-            self.unlabeled_ds = train_data
-        else:
-            total_size = len(train_data)
-            indices = np.arange(total_size)
-            np.random.seed(self.hparams.seed)
-            np.random.shuffle(indices)
+        total_size = len(train_data)
+        indices = np.arange(total_size)
+        np.random.seed(self.hparams.seed)
+        np.random.shuffle(indices)
 
-            label_count = int(total_size * self.hparams.label_pct)
-            labeled_indices = indices[:label_count]
-            unlabeled_indices = indices[label_count:]
+        label_count = int(total_size * self.hparams.label_pct)
+        labeled_indices = indices[:label_count]
+        unlabeled_indices = indices[label_count:]
 
-            self.labeled_ds = Subset(train_data, labeled_indices)
-            self.unlabeled_ds = Subset(train_data, unlabeled_indices)
+        self.labeled_ds = Subset(train_data, labeled_indices)
+        self.unlabeled_ds = Subset(train_data, unlabeled_indices)
 
         self.val_ds = datasets.ImageFolder(
             root=os.path.join(self.data_dir, 'valid'),
