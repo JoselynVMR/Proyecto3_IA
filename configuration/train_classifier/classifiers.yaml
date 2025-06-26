@@ -1,0 +1,10 @@
+classifiers:
+  - name: Classifier_A
+    encoder_weights: false
+    freeze_encoder: false
+  - name: Classifier_B1
+    encoder_weights: true
+    freeze_encoder: true
+  - name: Classifier_B2
+    encoder_weights: true
+    freeze_encoder: false

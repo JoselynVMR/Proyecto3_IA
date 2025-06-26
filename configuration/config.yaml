@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - experiment: train_autoencoder
+
+key:
+  api_key: 757af0e5727478d40e4a586ed9175f733ee00948

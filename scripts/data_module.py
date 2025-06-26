@@ -23,7 +23,7 @@ class DataModule(pl.LightningDataModule):
         pass
 
     def setup(self, stage: str = None):
-        transform = self.transform_noisy if self.use_noise else self.transform_clean
+        transform = self.transform_clean
 
         train_data = datasets.ImageFolder(
             root=os.path.join(self.data_dir, 'train'),

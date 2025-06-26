@@ -1,0 +1,8 @@
+defaults:
+  - /train_autoencoder/datamodule
+  - /train_autoencoder/model
+  - /train_autoencoder/trainer
+  - /train_autoencoder/callbacks/early_stopping
+  - /train_autoencoder/callbacks/checkpoint
+  - /train_autoencoder/wandb
+  - /train_autoencoder/paths

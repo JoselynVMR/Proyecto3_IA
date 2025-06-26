@@ -1,0 +1,4 @@
+paths:
+  data_dir: data/species_selected
+  encoder_dir: weights/au${experiment.train_classifier.datamodule.label}
+  checkpoint_dir: checkpoints/classifier/cs${experiment.train_classifier.datamodule.label}

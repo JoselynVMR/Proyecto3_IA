@@ -1,0 +1,3 @@
+paths:
+  data_dir: data/species_selected
+  weights_dir: weights/au${experiment.train_autoencoder.datamodule.label}

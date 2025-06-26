@@ -1,0 +1,8 @@
+checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  monitor: val_loss
+  dirpath: checkpoints/autoencoder
+  filename: best-UNetAE-v${experiment.train_autoencoder.datamodule.label}pct
+  save_top_k: 1
+  mode: min
+  save_weights_only: True

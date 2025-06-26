@@ -1,0 +1,6 @@
+datamodule:
+  batch_size: 64
+  num_workers: 4
+  seed: 42
+  label_pct: 0.3
+  label: 30

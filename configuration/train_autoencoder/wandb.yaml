@@ -1,0 +1,5 @@
+wandb:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  project: butterfly-ae
+  name: UNetAE_clean_${experiment.train_autoencoder.datamodule.label}pct
+  log_model: false

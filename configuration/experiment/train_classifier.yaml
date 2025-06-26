@@ -1,0 +1,9 @@
+defaults:
+  - /train_classifier/datamodule
+  - /train_classifier/model
+  - /train_classifier/classifiers
+  - /train_classifier/trainer
+  - /train_classifier/callbacks/early_stopping
+  - /train_classifier/callbacks/checkpoint
+  - /train_classifier/wandb
+  - /train_classifier/paths
