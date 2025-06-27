@@ -1,0 +1,3 @@
+analysis:
+  n_clusters: 30
+  examples_per_cluster: 10

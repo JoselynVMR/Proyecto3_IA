@@ -1,0 +1,4 @@
+paths:
+  checkpoint: "checkpoints/vdae/best-VDAE.ckpt"
+  data_dir: "data/species_selected"
+  output_dir: "clusters/vdae"

@@ -1,0 +1,5 @@
+defaults:
+  - /latent_dae/datamodule
+  - /latent_dae/model
+  - /latent_dae/analysis
+  - /latent_dae/paths
