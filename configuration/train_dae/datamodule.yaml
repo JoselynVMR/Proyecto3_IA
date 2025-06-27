@@ -1,0 +1,7 @@
+datamodule:
+  batch_size: 64
+  num_workers: 4
+  seed: 42
+  noise_amount: 0.15
+  image_size: [128, 128]
+  run_name: DAE_train_run

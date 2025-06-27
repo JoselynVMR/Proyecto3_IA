@@ -1,0 +1,4 @@
+model:
+  latent_dim: 512
+  learning_rate: 1e-4
+  use_variational: true

@@ -1,0 +1,8 @@
+defaults:
+  - /train_vdae/datamodule
+  - /train_vdae/model
+  - /train_vdae/trainer
+  - /train_vdae/callbacks/early_stopping
+  - /train_vdae/callbacks/checkpoint
+  - /train_vdae/wandb
+  - /train_vdae/paths

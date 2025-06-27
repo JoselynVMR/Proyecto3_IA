@@ -1,0 +1,4 @@
+paths:
+  data_dir: "data/species_selected"
+  checkpoint_dir: "checkpoints/vdae"
+  weights_dir: "weights/vdae"

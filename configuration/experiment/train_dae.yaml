@@ -1,0 +1,8 @@
+defaults:
+  - /train_dae/datamodule
+  - /train_dae/model
+  - /train_dae/trainer
+  - /train_dae/callbacks/early_stopping
+  - /train_dae/callbacks/checkpoint
+  - /train_dae/wandb
+  - /train_dae/paths
