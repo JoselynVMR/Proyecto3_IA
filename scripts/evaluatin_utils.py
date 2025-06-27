@@ -4,14 +4,12 @@ import pytorch_lightning as pl
 import time
 
 def get_model_size(path):
-    """Devuelve el tamaño del archivo en MB."""
     return round(os.path.getsize(path) / 1e6, 2)
 
 def measure_inference_time(model, dataloader, device, num_batches=100):
-    """Mide el tiempo de inferencia promedio por lote."""
     model.eval()
     model.to(device)
-    # Warm-up
+    # Peparacion
     with torch.no_grad():
         for batch in dataloader:
             inputs, _ = batch
@@ -29,10 +27,9 @@ def measure_inference_time(model, dataloader, device, num_batches=100):
             _ = model(inputs)
             total_time += time.perf_counter() - start_time
     avg_time = total_time / min(num_batches, len(dataloader))
-    return avg_time * 1000  # Convertir a milisegundos
+    return avg_time * 1000
 
 def evaluate_model(model, datamodule, accelerator, devices):
-    """Evalúa el modelo usando PyTorch Lightning y devuelve un dict de métricas."""
     trainer = pl.Trainer(
         logger=False,
         accelerator=accelerator,
@@ -47,11 +44,11 @@ def quantize_static_model(model, dataloader):
 
     model.cpu()
     model.eval()
-    # Fusión de módulos
+    # Diferentes modulos
     fuse_list = [
         ['fc.1', 'fc.2'],  # Linear + BatchNorm1d
         ['fc.5', 'fc.6'],  # Linear + BatchNorm1d
-        # Fusión para encoder1 (primer bloque)
+        # Fusión para encoder1
         ['encoder.0.0', 'encoder.0.1'],  # Conv2d + BatchNorm2d
         ['encoder.0.3', 'encoder.0.4'],  # Conv2d + BatchNorm2d
         # Fusión para encoder2
@@ -61,11 +58,11 @@ def quantize_static_model(model, dataloader):
         ['encoder.4.0', 'encoder.4.1'],
         ['encoder.4.3', 'encoder.4.4'],
         # Fusión para bottleneck
-        ['encoder.6.0', 'encoder.6.1'],  # Conv2d + BatchNorm2d
-        ['encoder.6.4', 'encoder.6.5']   # Conv2d + BatchNorm2d
+        ['encoder.6.0', 'encoder.6.1'],  
+        ['encoder.6.4', 'encoder.6.5']  
     ]
     model = torch.quantization.fuse_modules(model, fuse_list, inplace=True)
-    # Configurar cuantización
+    # Configurar cuantizacion
     model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
     torch.quantization.prepare(model, inplace=True)
     # Calibrar

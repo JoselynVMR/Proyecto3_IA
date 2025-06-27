@@ -7,7 +7,6 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from hydra.core.global_hydra import GlobalHydra
 
-# Agregar ruta raíz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from scripts.models.variational_autoencoder_unet import UNetAutoencoder

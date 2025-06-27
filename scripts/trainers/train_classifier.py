@@ -7,7 +7,6 @@ from omegaconf import DictConfig
 from hydra.utils import instantiate
 from hydra import main
 
-# Agregar ruta raíz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from scripts.models.classifier import ButterflyClassifier
@@ -21,7 +20,6 @@ def train_classifier(cfg: DictConfig):
 
     os.environ["WANDB_API_KEY"] = cfg.key.api_key
 
-    # Rutas de pesos del encoder preentrenado
     encoder_weights = {
         'encoder1': os.path.join(cfg.experiment.train_classifier.paths.encoder_dir, "encoder_stage1.pth"),
         'encoder2': os.path.join(cfg.experiment.train_classifier.paths.encoder_dir, "encoder_stage2.pth"),

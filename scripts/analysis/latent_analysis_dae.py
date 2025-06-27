@@ -1,4 +1,3 @@
-# analyze_latents.py
 import os
 import sys
 import torch
@@ -18,7 +17,7 @@ GlobalHydra.instance().clear()
 
 @main(config_path='../../configuration', config_name='config', version_base=None)
 def analyze_latents(cfg: DictConfig):
-    # 🧠 Cargar modelo
+    # Cargar modelo
     model = UNetAutoencoder.load_from_checkpoint(
         cfg.experiment.latent_dae.paths.checkpoint,
         use_variational=cfg.experiment.latent_dae.model.use_variational
@@ -27,7 +26,7 @@ def analyze_latents(cfg: DictConfig):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # 📦 Cargar datos sin ruido
+    # Cargar datos sin ruido
     data_module = DataModule(
         hparams=cfg.experiment.latent_dae.datamodule,
         data_dir=cfg.experiment.latent_dae.paths.data_dir,
@@ -36,13 +35,13 @@ def analyze_latents(cfg: DictConfig):
     data_module.setup("fit")
     dataloader = data_module.train_dataloader()
 
-    # 🔍 Extraer espacio latente
+    # Extraer espacio latente
     latents = extract_latents(model, dataloader, device)
 
-    # 📁 Crear carpeta de salida
+    # Crear carpeta de salida
     os.makedirs(cfg.experiment.latent_dae.paths.output_dir, exist_ok=True)
 
-    # 📈 Visualizaciones
+    # Visualizaciones
     plot_tsne_only(
         latents,
         save_path=os.path.join(cfg.experiment.latent_dae.paths.output_dir, "tsne_only.png"),

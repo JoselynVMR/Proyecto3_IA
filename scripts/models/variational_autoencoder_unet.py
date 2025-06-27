@@ -22,14 +22,14 @@ class UNetAutoencoder(pl.LightningModule):
 
         self.conv_bottleneck = nn.Conv2d(features * 4, features * 8, kernel_size=3, padding=1)
         self.bottleneck_spatial_size = 16 
-        self.bottleneck_channels = features * 8 # 64 * 8 = 512
-        self.bottleneck_flat_size = self.bottleneck_channels * self.bottleneck_spatial_size * self.bottleneck_spatial_size # 512 * 16 * 16 = 131072
+        self.bottleneck_channels = features * 8 
+        self.bottleneck_flat_size = self.bottleneck_channels * self.bottleneck_spatial_size * self.bottleneck_spatial_size 
 
         if self.use_variational:
             self.fc_mu = nn.Linear(self.bottleneck_flat_size, latent_dim)
             self.fc_logvar = nn.Linear(self.bottleneck_flat_size, latent_dim)
             self.fc_decode = nn.Linear(latent_dim, self.bottleneck_flat_size)
-        else: # Para el DAE, añadir capas para una representación latente compacta
+        else:
             self.fc_dae_latent = nn.Linear(self.bottleneck_flat_size, latent_dim)
             self.fc_dae_decode = nn.Linear(latent_dim, self.bottleneck_flat_size)
 
@@ -113,7 +113,7 @@ class UNetAutoencoder(pl.LightningModule):
         x_noisy, x_clean = batch
 
         if self.use_variational:
-            x_hat, mu, logvar = self.forward(x_noisy) # Desempaqueta correctamente para VAE
+            x_hat, mu, logvar = self.forward(x_noisy)
             recon_loss = F.mse_loss(x_hat, x_clean, reduction="mean")
             kl_div_weight = getattr(self.hparams, 'kl_weight', 1e-4)
             kl_div = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
@@ -121,7 +121,6 @@ class UNetAutoencoder(pl.LightningModule):
             self.log_dict({f"{stage}_loss": loss, f"{stage}_recon": recon_loss, f"{stage}_kl": kl_div})
             return loss
         else:
-            # LÍNEA CORREGIDA: Desempaquetar la tupla para obtener x_hat y descartar la representación latente
             x_hat, _ = self.forward(x_noisy) 
             loss = F.mse_loss(x_hat, x_clean, reduction="mean")
             self.log(f"{stage}_loss", loss)

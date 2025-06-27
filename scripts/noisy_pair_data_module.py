@@ -73,21 +73,19 @@ class DataModule(pl.LightningDataModule):
             noisy_transform=self.transform_noisy
         )
 
-        # Datos de validación: DEBE SER TAMBIÉN UN NoisyPairDataset
         base_val = datasets.ImageFolder(
             root=os.path.join(self.data_dir, 'valid'),
         )
-        self.val_ds = NoisyPairDataset( # <--- CAMBIAR ESTO
+        self.val_ds = NoisyPairDataset(
             dataset=base_val,
             clean_transform=self.transform_clean,
             noisy_transform=self.transform_noisy
         )
 
-        # Datos de prueba: DEBE SER TAMBIÉN UN NoisyPairDataset
         base_test = datasets.ImageFolder(
             root=os.path.join(self.data_dir, 'test'),
         )
-        self.test_ds = NoisyPairDataset( # <--- CAMBIAR ESTO
+        self.test_ds = NoisyPairDataset(
             dataset=base_test,
             clean_transform=self.transform_clean,
             noisy_transform=self.transform_noisy

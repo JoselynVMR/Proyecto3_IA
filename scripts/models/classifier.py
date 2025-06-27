@@ -18,7 +18,7 @@ class ButterflyClassifier(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # 🔄 Inicializar autoencoder base para extraer el encoder
+        # Inicializar autoencoder
         autoencoder = UNetAutoencoder()
 
         if encoder_weights_path:
@@ -27,7 +27,7 @@ class ButterflyClassifier(pl.LightningModule):
             autoencoder.encoder3.load_state_dict(torch.load(encoder_weights_path['encoder3']))
             autoencoder.bottleneck.load_state_dict(torch.load(encoder_weights_path['bottleneck']))
 
-        # 🧠 Construcción del encoder con pesos del autoencoder
+        # Construcción del encoder
         self.encoder = nn.Sequential(
             autoencoder.encoder1,
             autoencoder.pool1,
@@ -38,18 +38,18 @@ class ButterflyClassifier(pl.LightningModule):
             autoencoder.bottleneck
         )
 
-        # 🧊 Congelar encoder si se requiere
+        # Congelar encoder
         if freeze_encoder:
             for param in self.encoder.parameters():
                 param.requires_grad = False
 
-        # 📐 Cálculo de dimensiones
-        input_size = 128  # Asumido 128x128
+        # Cálculo de dimensiones
+        input_size = 128 
         encoded_channels = 512
-        encoded_dim = (input_size // 8)  # tras 3 MaxPool(2)
+        encoded_dim = (input_size // 8) 
         num_features = encoded_channels * encoded_dim * encoded_dim
 
-        # 🔚 Capa fully connected
+        # Capa fully connected
         self.fc = nn.Sequential(
             nn.Flatten(),
             nn.Linear(num_features, 2048),
@@ -65,7 +65,7 @@ class ButterflyClassifier(pl.LightningModule):
             nn.Linear(1024, num_classes)
         )
 
-        # 📊 Métricas
+        # Metricas
         self.train_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)

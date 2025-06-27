@@ -7,39 +7,37 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import random
 from torchvision.utils import make_grid
-from torch.utils.data import DataLoader, Subset
-import gc # Add this at the top
+import gc
 
 def extract_latents(model, dataloader, device):
-    model.eval() # Poner el modelo en modo de evaluación
+    model.eval()
     latents_list = []
-    
+
+    # Extraer los vectores latentes
     print("Extrayendo vectores latentes...")
-    with torch.no_grad(): # Desactivar el cálculo de gradientes
+    with torch.no_grad(): 
         for batch_idx, batch in enumerate(dataloader):
-            x_noisy, _ = batch # Usamos solo la imagen ruidosa para la entrada
+            x_noisy, _ = batch 
             x = x_noisy.to(device)
 
             if model.use_variational:
-                # Para VAE, el forward devuelve x_hat, mu, logvar. Nos interesa mu.
                 _, mu, _ = model.forward(x) 
                 latent_representation = mu
             else:
-                # Para DAE, el forward devuelve x_hat, latent_representation. Nos interesa latent_representation.
                 _, latent_rep_dae = model.forward(x)
                 latent_representation = latent_rep_dae
 
-            latents_list.append(latent_representation.cpu()) # Mover a CPU y añadir a la lista
+            latents_list.append(latent_representation.cpu())
 
             # Limpieza de memoria
             del x, latent_representation
             if model.use_variational:
-                del mu # Limpiar mu solo si fue creada
+                del mu
             if device.type == 'cuda':
-                torch.cuda.empty_cache() # Vaciar caché de CUDA
-            gc.collect() # Ejecutar recolector de basura
+                torch.cuda.empty_cache() 
+            gc.collect()
 
-    all_latents_np = torch.cat(latents_list, dim=0).numpy() # Concatenar y convertir a NumPy
+    all_latents_np = torch.cat(latents_list, dim=0).numpy()
     print(f"Vectores latentes extraídos: {all_latents_np.shape}")
     return all_latents_np
 
@@ -56,7 +54,7 @@ def plot_tsne_kmeans(latents, n_clusters=10, save_path="tsne_kmeans.png", model_
     plt.figure(figsize=(10, 8))
     colors = cm.get_cmap('gist_ncar', n_clusters)
     scatter = plt.scatter(latents_2d[:, 0], latents_2d[:, 1], c=labels, cmap=colors, alpha=0.6)
-    # Calcular y graficar centroides (aproximados en el espacio 2D)
+    # Calcular y graficar centroides
     for i in range(n_clusters):
         cluster_points = latents_2d[labels == i]
         if len(cluster_points) > 0:
@@ -68,7 +66,7 @@ def plot_tsne_kmeans(latents, n_clusters=10, save_path="tsne_kmeans.png", model_
     plt.xlabel("Componente 1")
     plt.ylabel("Componente 2")
 
-    # 5. Añadir una leyenda para los clústeres
+    # Añadir los cluster
     handles, _ = scatter.legend_elements()
     plt.legend(handles=handles, labels=[f"Clúster {i}" for i in range(n_clusters)], title="Clústeres")
     plt.tight_layout()
@@ -91,35 +89,31 @@ def plot_tsne_only(latents, save_path="tsne_only.png", model_name="Autoencoder")
 
 def plot_tsne_only(latents, save_path="tsne_only.png", model_name="Autoencoder",
                    perplexity=15, random_seed=42, true_labels=None):
-    # 1. Escalar los latentes
+    # Escalar los latentes
     scaler = StandardScaler()
     latents_scaled = scaler.fit_transform(latents)
 
-    # 2. Aplicar t-SNE con random_state para reproducibilidad
+    # Aplicar t-SNE
     tsne = TSNE(n_components=2, perplexity=15, max_iter=2000, n_iter_without_progress=500, random_state=42)
     latents_2d = tsne.fit_transform(latents_scaled)
 
     plt.figure(figsize=(10, 8))
 
+    # Se eligen los colores y etiquetas
     if true_labels is not None:
-        # Usar las etiquetas verdaderas para colorear
         num_classes = len(set(true_labels))
-        # Elegir un colormap adecuado para el número de clases
-        # 'gist_ncar' o 'hsv' son buenos para muchos colores distintos
         cmap = cm.get_cmap('gist_ncar', num_classes)
         scatter = plt.scatter(latents_2d[:, 0], latents_2d[:, 1], c=true_labels, cmap=cmap, alpha=0.6)
-        # Añadir leyenda si hay true_labels
         handles, _ = scatter.legend_elements()
         plt.legend(handles=handles, labels=[f"Clase {i}" for i in sorted(set(true_labels))], title="Clases Reales")
     else:
-        # Si no hay etiquetas verdaderas, usar un color único (los colores aleatorios no son útiles)
         plt.scatter(latents_2d[:, 0], latents_2d[:, 1], color='steelblue', alpha=0.6)
 
     plt.title(f"t-SNE de espacio latente ({model_name})")
     plt.xlabel("Componente 1")
     plt.ylabel("Componente 2")
     plt.tight_layout()
-    plt.savefig(save_path, dpi=300) # Guardar con mayor resolución
+    plt.savefig(save_path, dpi=300)
     plt.close()
 
 def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, output_dir="clusters",
@@ -129,8 +123,8 @@ def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, outp
     model.eval()
     device = next(model.parameters()).device
 
-    # --- Manejo de la extracción de latentes ---
-    all_latents_np = None # Para almacenar los latentes como array de NumPy
+    # Extracción de latentes
+    all_latents_np = None
     all_indices = []
 
     if precomputed_latents is None:
@@ -141,24 +135,22 @@ def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, outp
                 x = x_noisy.to(device)
 
                 if model.use_variational:
-                    # Para VAE, el forward devuelve x_hat, mu, logvar. Nos interesa mu.
                     _, mu, _ = model.forward(x) 
                     latent_representation = mu
                 else:
-                    # Para DAE, el forward devuelve x_hat, latent_representation. Nos interesa latent_representation.
                     _, latent_rep_dae = model.forward(x)
                     latent_representation = latent_rep_dae
 
                 temp_latents_list.append(latent_representation.cpu())
 
-                # Recopilar índices originales del dataset
+                # Recopilar indices originales del dataset
                 start_idx = batch_idx * dataloader.batch_size
                 end_idx = min((batch_idx + 1) * dataloader.batch_size, len(dataloader.dataset))
                 all_indices.extend(range(start_idx, end_idx))
 
-                del x, latent_representation # Limpiar variables
+                del x, latent_representation
                 if model.use_variational:
-                    del mu # Liberar mu solo si fue creada
+                    del mu 
                 if device.type == 'cuda':
                     torch.cuda.empty_cache()
                 gc.collect()
@@ -166,17 +158,14 @@ def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, outp
         all_latents_np = torch.cat(temp_latents_list).numpy()
         print(f"Vectores latentes extraídos: {all_latents_np.shape}")
     else:
-        # Usar latentes precalculados
         if isinstance(precomputed_latents, torch.Tensor):
             all_latents_np = precomputed_latents.numpy()
         else:
-            all_latents_np = precomputed_latents # Ya es NumPy
-        # Si se proporcionan latentes precomputados, asumimos que corresponden al dataset completo.
-        # En un escenario real, deberías asegurarte de que estos índices también coincidan.
+            all_latents_np = precomputed_latents
         all_indices = list(range(len(dataloader.dataset)))
         print("Usando vectores latentes precalculados.")
 
-    # --- Manejo de K-Means ---
+    # Manejo de K-Means
     labels_np = precomputed_labels
     if labels_np is None:
         print(f"Aplicando K-Means con {n_clusters} clústeres...")
@@ -188,7 +177,7 @@ def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, outp
 
 
     print("Generando visualizaciones de clústeres...")
-    # Iterar sobre TODOS los clústeres (de 0 a n_clusters-1)
+    # Iterar sobre TODOS los clústeres
     for i in range(n_clusters):
         cluster_original_indices = [all_indices[j] for j, label in enumerate(labels_np) if label == i]
         
@@ -201,29 +190,24 @@ def show_cluster(dataloader, model, n_clusters=30, examples_per_cluster=10, outp
         
         images_to_plot = []
         for idx in selected_original_indices:
-            # Asumiendo que dataloader.dataset[idx] devuelve (imagen_ruidosa, imagen_limpia)
-            # Y que queremos la imagen limpia (x_clean) para visualizar el contenido del clúster.
             _, clean_img = dataloader.dataset[idx]
             images_to_plot.append(clean_img)
         
-        # Asegurarse de que las imágenes estén en el formato correcto para make_grid (Tensor)
+        # Asegurarse de que las imagenes estén en el formato correcto
         images = torch.stack(images_to_plot)
-
-        # Ajustar nrow para que la cuadrícula sea más cuadrada, si es posible
         nrow_grid = int(examples_per_cluster**0.5)
-        if nrow_grid == 0: nrow_grid = 1 # Evitar división por cero si examples_per_cluster es 0
+        if nrow_grid == 0: nrow_grid = 1
         
         grid = make_grid(images, nrow=nrow_grid, normalize=True)
         
-        # Ajustar el tamaño de la figura dinámicamente
         fig_width = 10
-        fig_height = fig_width * grid.shape[1] / grid.shape[2] # Mantiene la proporción de aspecto
+        fig_height = fig_width * grid.shape[1] / grid.shape[2]
         
         plt.figure(figsize=(fig_width, fig_height))
         plt.imshow(grid.permute(1, 2, 0).cpu().numpy())
         plt.title(f"Clúster {i} (Ejemplos: {len(selected_original_indices)})")
         plt.axis("off")
-        plt.savefig(f"{output_dir}/cluster_{i}.png", dpi=300) # Guardar con alta resolución
+        plt.savefig(f"{output_dir}/cluster_{i}.png", dpi=300)
         plt.close()
 
         del images, grid, images_to_plot

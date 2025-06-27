@@ -6,7 +6,6 @@ from torchmetrics import Accuracy, Precision, Recall, F1Score
 
 from scripts.models.autoencoder_unet import UNetAutoencoder
 
-# NOTA: esta clase es practicamente la misma de ButterflyClassifier, solo que se le agrega lo de cuantizacion en el init y en la funcion de forward
 class QuantizableButterflyClassifier(pl.LightningModule):
     def __init__(
         self,
@@ -18,7 +17,7 @@ class QuantizableButterflyClassifier(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        # 🔄 Inicializar autoencoder base para extraer el encoder
+        # Inicializar autoencoder
         autoencoder = UNetAutoencoder()
 
         if encoder_weights_path:
@@ -27,7 +26,7 @@ class QuantizableButterflyClassifier(pl.LightningModule):
             autoencoder.encoder3.load_state_dict(torch.load(encoder_weights_path['encoder3']))
             autoencoder.bottleneck.load_state_dict(torch.load(encoder_weights_path['bottleneck']))
 
-        # 🧠 Construcción del encoder con pesos del autoencoder
+        # Construcción del encoder
         self.encoder = nn.Sequential(
             autoencoder.encoder1,
             autoencoder.pool1,
@@ -38,18 +37,18 @@ class QuantizableButterflyClassifier(pl.LightningModule):
             autoencoder.bottleneck
         )
 
-        # 🧊 Congelar encoder si se requiere
+        # Congelar encoder
         if freeze_encoder:
             for param in self.encoder.parameters():
                 param.requires_grad = False
 
-        # 📐 Cálculo de dimensiones
-        input_size = 128  # Asumido 128x128
+        # Cálculo de dimensiones
+        input_size = 128 
         encoded_channels = 512
-        encoded_dim = (input_size // 8)  # tras 3 MaxPool(2)
+        encoded_dim = (input_size // 8)  
         num_features = encoded_channels * encoded_dim * encoded_dim
 
-        # 🔚 Capa fully connected
+        # Capa fully connected
         self.fc = nn.Sequential(
             nn.Flatten(),
             nn.Linear(num_features, 2048),
@@ -65,7 +64,7 @@ class QuantizableButterflyClassifier(pl.LightningModule):
             nn.Linear(1024, num_classes)
         )
 
-        # 📊 Métricas
+        # Métricas
         self.train_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
@@ -80,10 +79,10 @@ class QuantizableButterflyClassifier(pl.LightningModule):
         self.dequant = torch.quantization.DeQuantStub()
 
     def forward(self, x):
-        x = self.quant(x)         # cuantizar entrada
+        x = self.quant(x)        
         x = self.encoder(x)
         x = self.fc(x)
-        x = self.dequant(x)       # des-cuantizar salida
+        x = self.dequant(x)       
         return x
 
     def training_step(self, batch, batch_idx):

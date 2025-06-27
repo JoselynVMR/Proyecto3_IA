@@ -8,7 +8,6 @@ from hydra.core.global_hydra import GlobalHydra
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-# 📁 Añadir ruta base del proyecto
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from scripts.models.variational_autoencoder_unet import UNetAutoencoder
@@ -19,7 +18,7 @@ GlobalHydra.instance().clear()
 
 @main(config_path='../../configuration', config_name='config', version_base=None)
 def analyze_latents(cfg: DictConfig):
-    # 🧠 Cargar el modelo VDAE entrenado
+    # Cargar el modelo VDAE entrenado
     model = UNetAutoencoder.load_from_checkpoint(
         cfg.experiment.latent_vdae.paths.checkpoint,
         use_variational=cfg.experiment.latent_vdae.model.use_variational
@@ -28,7 +27,7 @@ def analyze_latents(cfg: DictConfig):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # 📦 DataModule sin ruido
+    # DataModule sin ruido
     data_module = DataModule(
         hparams=cfg.experiment.latent_vdae.datamodule,
         data_dir=cfg.experiment.latent_vdae.paths.data_dir,
@@ -37,10 +36,10 @@ def analyze_latents(cfg: DictConfig):
     data_module.setup("fit")
     dataloader = data_module.train_dataloader()
 
-    # 🔍 Extracción del espacio latente
+    # Extracción del espacio latente
     latents = extract_latents(model, dataloader, device)
 
-    # 📈 Visualizaciones
+    # Visualizaciones
     os.makedirs(cfg.experiment.latent_vdae.paths.output_dir, exist_ok=True)
 
     plot_tsne_only(
