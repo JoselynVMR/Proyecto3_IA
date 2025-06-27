@@ -9,7 +9,7 @@ Este es un repositorio para almacenar el proyecto 3 del curso de inteligencia ar
 
 ## Ejecucion
 
-Este proyecto tiene varias carpetas con diferentes contenidos, pero para el envió del mismo mediante la plataforma y almacenamiento en GitHub, pero estas mismas se explican en la parte de `Organización de carpetas`, lo único necesario para una ejecución inicial es la carpeta de `data` como se explica a continuación.
+Este proyecto tiene varias carpetas con diferentes contenidos, pero para el envió del mismo mediante la plataforma y almacenamiento en GitHub, pero estas mismas se explican en la parte de `Organización de carpetas`, lo único necesario para una ejecución inicial es la carpeta de `data` como se explica a continuación. Ademas que para guardar y optimizar la ejecucion desde Google Colab todos los entrenamientos fueron con 10 epocas.
 
 * Descargar el set de datos en formato .zip de Kaggle `https://www.kaggle.com/datasets/gpiosenka/butterflies-100-image-dataset-classification`.
 * Posterior a extro extraer los datos, especificamente el `.csv` y las tres carpetas `test`, `train` y `valid` y agregarlas dentro de la carpeta `data` del proyecto.
@@ -48,7 +48,7 @@ El notebook se divide por las siguientes 3 partes importantes.
 
 ### Experimento 2
 
-* Entrenamiento del DAE.
-* Muesta del espacio latente del DAE
+* Entrenamiento del DAE sin.
+* Muesta del espacio latente del DAE sin etiquestas.
 * Entrenamiento del VDAE.
-* Muesta del espacio latente del VDAE
+* Muesta del espacio latente del VDAE sin etiquestas.
